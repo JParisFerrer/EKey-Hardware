@@ -1,0 +1,14 @@
+$35: Ras Pi
+      http://www.mcmelectronics.com/product/83-16530
+
+$11: Servo Motor
+    http://www.mcmelectronics.com/product/28-17452
+
+$7.5: MicroSD card
+    http://www.mcmelectronics.com/product/83-16267
+
+$6: Power
+http://www.mcmelectronics.com/product/28-19335
+
+$10 : Bluetooth
+    http://smile.amazon.com/Edimax-EW-7811Un-150Mbps-Raspberry-Supports/dp/B003MTTJOY/ref=sr_1_7?ie=UTF8&qid=1442182598&sr=8-7&keywords=bluetooth+dongle

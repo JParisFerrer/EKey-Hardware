@@ -50,6 +50,7 @@ def setupDataListener():
 	
 def listenForData():
 	try:
+		# keep accepting connections
 		while True:
 			client_sock, client_info = server_sock.accept()
 			print("Accepted connection from: ", client_info)
@@ -88,7 +89,7 @@ def run():
 		setupDataListener()
 		
 		# temporary, listenForData will block when it is implemented
-		time.sleep(20)
+		time.sleep(120)
 		
 	except Exception as e:
 		print("Exception " + e)

@@ -2,6 +2,9 @@ from bluetooth import *
 from bluetooth.ble import BeaconService
 import time
 
+# Whether to use BLE beacon or normal bluetooth advertisement
+BLE = True
+
 # make sure we have this global variable set up
 service = None
 
@@ -29,6 +32,15 @@ def setupDataListener():
 	server_sock.listen(1)
 
 	port = server_sock.getsockname()[1]
+	
+	# advertise normally if no BLE
+	if(not BLE):
+		advertise_service( server_sock, "EKey Lock",
+                   service_id = uuid,
+                   service_classes = [ uuid, SERIAL_PORT_CLASS ],
+                   profiles = [ SERIAL_PORT_PROFILE ], 
+#                   protocols = [ OBEX_UUID ] 
+                    )
 	
 	print("Waiting for connection on RFCOMM channel %d" % port)
 
@@ -67,15 +79,18 @@ def processData(bytes):
 
 def run():
 	try:
-		startBLEBeacon()
+		if (BLE):
+			startBLEBeacon()
 		
 		setupDataListener()
 		
 		# temporary, listenForData will block when it is implemented
 		time.sleep(20)
 		
-	except e:
+	except Exception as e:
 		print("Exception " + e)
 		
 	finally:
 		stopBLEBeacon()
+		
+run()

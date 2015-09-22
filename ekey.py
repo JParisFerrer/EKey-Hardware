@@ -16,6 +16,7 @@ uuid = "dad8bf14-b6c3-45fa-b9a7-94c1fde2e7c6"
 
 def startBLEBeacon():
 	print("Starting BLE Beacon")
+	global service
 	service = BeaconService()
 	
 	service.start_advertising(uuid, 		# uuid of server
@@ -29,6 +30,7 @@ def stopBLEBeacon():
 	service.stop_advertising()
 	
 def setupDataListener():
+	global server_sock
 	server_sock = BluetoothSocket( RFCOMM )
 	server_sock.bind(("",PORT_ANY))
 	server_sock.listen(1)
@@ -75,7 +77,7 @@ def listenForData():
 			processData(allData)
 			
 	except Exception as e:
-		print ("Error listening for data: %s" % e)
+		print ("Error listening for data: %s" % str(e))
 		raise	# throw it back up to terminate (can be changed later)
 	
 def processData(bytes):
@@ -94,7 +96,7 @@ def run():
 		time.sleep(120)
 		
 	except Exception as e:
-		print("Exception " + e)
+		print("Exception " + str(e))
 		
 	finally:
 		print("Exiting...")

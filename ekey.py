@@ -91,6 +91,7 @@ def run():
 		print("Exception " + e)
 		
 	finally:
+		if (BLE):
 		stopBLEBeacon()
 		
 run()

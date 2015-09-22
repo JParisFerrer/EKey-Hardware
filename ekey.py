@@ -15,6 +15,7 @@ server_sock = None
 uuid = "dad8bf14-b6c3-45fa-b9a7-94c1fde2e7c6"
 
 def startBLEBeacon():
+	print("Starting BLE Beacon")
 	service = BeaconService()
 	
 	service.start_advertising(uuid, 		# uuid of server
@@ -24,6 +25,7 @@ def startBLEBeacon():
 		200)								# interval - not exactly sure what this does either, but this is the default
 	
 def stopBLEBeacon():
+	print("Stopping BLE Beacon")
 	service.stop_advertising()
 	
 def setupDataListener():
@@ -35,6 +37,7 @@ def setupDataListener():
 	
 	# advertise normally if no BLE
 	if(not BLE):
+		print ("Starting non-BLE beacon")
 		advertise_service( server_sock, "EKey Lock",
                    service_id = uuid,
                    service_classes = [ uuid, SERIAL_PORT_CLASS ],
@@ -91,7 +94,9 @@ def run():
 		print("Exception " + e)
 		
 	finally:
+		print("Exiting...")
+		
 		if (BLE):
-		stopBLEBeacon()
+			stopBLEBeacon()
 		
 run()

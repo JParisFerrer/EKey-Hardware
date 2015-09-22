@@ -101,5 +101,7 @@ def run():
 		
 		if (BLE):
 			stopBLEBeacon()
+		server_sock.close()	
+		
 		
 run()

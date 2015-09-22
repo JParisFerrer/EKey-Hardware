@@ -88,6 +88,8 @@ def run():
 		
 		setupDataListener()
 		
+		listenForData()
+		
 		# temporary, listenForData will block when it is implemented
 		time.sleep(120)
 		

@@ -98,6 +98,8 @@ def initDatabase():
 
 def run():
 	try:
+		initDatabase()
+		
 		if (BLE):
 			startBLEBeacon()
 		

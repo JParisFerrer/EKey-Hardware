@@ -90,11 +90,13 @@ def processData(bytes):
 	pass
 
 def initDatabase():
-	# if database doesn't exist, create it
+	global sqlCon
+	
+	# if database doesn't exist, create it using external shell script
 	if (not os.path.isfile("ekey.db")):
 		os.system("./db.sh")
 		
-	
+	sqlCon = lite.connect("./ekey.db")
 
 def run():
 	try:

@@ -1,6 +1,9 @@
 from bluetooth import *
 from bluetooth.ble import BeaconService
 import time
+import sqlite3 as lite;
+import os;
+import os.path;
 
 # Whether to use BLE beacon or normal bluetooth advertisement
 BLE = True
@@ -10,6 +13,9 @@ service = None
 
 # our normal bluetooth socket
 server_sock = None
+
+# the connection to our SQL server
+sqlCon = None
 
 # just a random uuid I generated
 uuid = "dad8bf14-b6c3-45fa-b9a7-94c1fde2e7c6"
@@ -82,6 +88,13 @@ def listenForData():
 	
 def processData(bytes):
 	pass
+
+def initDatabase():
+	# if database doesn't exist, create it
+	if (!os.path.isfile("ekey.db")):
+		os.system("db.sh")
+		
+	
 
 def run():
 	try:

@@ -91,7 +91,7 @@ def processData(bytes):
 
 def initDatabase():
 	# if database doesn't exist, create it
-	if (!os.path.isfile("ekey.db")):
+	if (not os.path.isfile("ekey.db")):
 		os.system("db.sh")
 		
 	

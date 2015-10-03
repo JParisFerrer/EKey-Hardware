@@ -1,5 +1,6 @@
 from bluetooth import *
 from bluetooth.ble import BeaconService
+import RPi.GPIO as GPIO
 import time
 import sqlite3 as lite;
 import os;
@@ -19,6 +20,13 @@ sqlCon = None
 
 # just a random uuid I generated
 uuid = "dad8bf14-b6c3-45fa-b9a7-94c1fde2e7c6"
+
+doorServo = GPIO.PWM(1, 50)    # create an object p for PWM on port 25 at 50 Hertz
+#We will need to fiddle wtih the frequency most likely. 
+#It's global because I don't want to constantly construct/cleanup an object every time we want to refer to out one servo
+#I don't like having one global object with global functions written just to interface with it, but 
+#since we only have one servo I don't think it's worth the time to extantiate an lock/unlock sub in class
+
 
 def startBLEBeacon():
 	print("Starting BLE Beacon")
@@ -97,7 +105,27 @@ def initDatabase():
 		os.system("./db.sh")
 		
 	sqlCon = lite.connect("./ekey.db")
+	
+def setDoorServo(int pin, int position):
+	position = max(min(postion,100),0)#cap position between 0-100
 
+	global doorServo
+	doorServo.start(position) #between 0-100 % duty cycle, this will need adjustment in the lock/unlock functions
+	
+def stopDoorServo():
+	global doorServo
+	doorServo.stop()
+	
+def unlockDoor():#these are there own functions rather than direct setservo calls because we will be fiddling with the 0/100 and 
+	setDoorServo(0)#this is better than search and replacing the 0/100 values and sleep times every time we want to fiddle with them
+	time.sleep(5)
+	stopDoorServo()
+
+def lockDoor():
+	setDoorServo(100)
+	time.sleep(5)
+	stopDoorServo()
+	
 def run():
 	try:
 		initDatabase()

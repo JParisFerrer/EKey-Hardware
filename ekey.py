@@ -123,7 +123,7 @@ def getKeyByUUID(uuid):
 		print("Error getting Key by UUID: %s" % e.args[0])
 		
 
-def setDoorServo(int pin, int position):
+def setDoorServo(pin, position):
 	position = max(min(postion,100),0)#cap position between 0-100
 
 	global doorServo

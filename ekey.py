@@ -92,7 +92,8 @@ def listenForData():
 		raise	# throw it back up to terminate (can be changed later)
 	
 def processData(bytes):
-	pass
+	asString = ''.join(bytes).decode("utf-8")	# take our list of bytes, concat into a byte string, then decode it
+	print("Data: " + asString)
 
 def initDatabase():
 	global sqlCon

@@ -81,7 +81,7 @@ def listenForData():
 					# add the received data to out variable of all dat
 					allData.extend(data)
 					
-					processData(allData)	# process data everyime for testing
+					processData(data)	# process data everyime for testing
 				
 			except IOError:
 				print("disconnected")

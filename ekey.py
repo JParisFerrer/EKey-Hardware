@@ -81,13 +81,13 @@ def listenForData():
 					# add the received data to out variable of all dat
 					allData.extend(data)
 					
-					break		# break every time for testing, so read data then process
+					processData(allData)	# process data everyime for testing
 				
 			except IOError:
 				print("disconnected")
 				
 			# at this point all of our data should be read
-			processData(allData)
+			#processData(allData)
 			
 	except Exception as e:
 		print ("Error listening for data: %s" % str(e))
@@ -116,7 +116,7 @@ def initDatabase():
 	sqlCon = lite.connect("./ekey.db")
 	
 	# returs our data by column name, so data["UUID"], instead of data[2] (or whatever column number it is)
-	sqlCon.row_Factory = lite.Row
+	sqlCon.row_factory = lite.Row
 	
 def getKeyByUUID(uuid):
 	try:

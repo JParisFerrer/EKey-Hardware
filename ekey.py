@@ -108,7 +108,7 @@ def initDatabase():
 	sqlCon = lite.connect("./ekey.db")
 	
 	# returs our data by column name, so data["UUID"], instead of data[2] (or whatever column number it is)
-	sqlCon.row_Factory = lite.row
+	sqlCon.row_Factory = lite.Row
 	
 def getKeyByUUID(uuid):
 	try:

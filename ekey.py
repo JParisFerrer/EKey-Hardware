@@ -80,6 +80,8 @@ def listenForData():
 					
 					# add the received data to out variable of all dat
 					allData.extend(data)
+					
+					break		# break every time for testing, so read data then process
 				
 			except IOError:
 				print("disconnected")
@@ -92,8 +94,17 @@ def listenForData():
 		raise	# throw it back up to terminate (can be changed later)
 	
 def processData(bytes):
-	asString = ''.join(bytes).decode("utf-8")	# take our list of bytes, concat into a byte string, then decode it
-	print("Data: " + asString)
+	try:
+		asString = ''.join(chr(v) for v in bytes)	# take our list of bytes, convert into char (ascii only)
+		print("Data: " + asString)
+		
+		if(asString == "unlock"):
+			unlockDoor()
+		elif (asString == "lock"):
+			lockDoor()
+			
+	except Exception as e:
+		print ("Error printing data: %s" % str(e))
 
 def initDatabase():
 	global sqlCon
@@ -105,7 +116,7 @@ def initDatabase():
 	sqlCon = lite.connect("./ekey.db")
 	
 	# returs our data by column name, so data["UUID"], instead of data[2] (or whatever column number it is)
-	sqlCon.row_Factory = lite.row
+	sqlCon.row_Factory = lite.Row
 	
 def getKeyByUUID(uuid):
 	try:
@@ -138,11 +149,13 @@ def unlockDoor():#these are there own functions rather than direct setservo call
 	setDoorServo(0)#this is better than search and replacing the 0/100 values and sleep times every time we want to fiddle with them
 	time.sleep(5)
 	stopDoorServo()
+	print("Unlocking door")
 
 def lockDoor():
-	setDoorServo(100)
-	time.sleep(5)
-	stopDoorServo()
+	#setDoorServo(100)
+	#time.sleep(5)
+	#stopDoorServo()
+	print("Locking door")
 	
 def run():
 	try:

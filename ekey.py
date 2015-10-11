@@ -80,6 +80,8 @@ def listenForData():
 					
 					# add the received data to out variable of all dat
 					allData.extend(data)
+					
+					break		# break every time for testing, so read data then process
 				
 			except IOError:
 				print("disconnected")
@@ -95,6 +97,12 @@ def processData(bytes):
 	try:
 		asString = ''.join(chr(v) for v in bytes)	# take our list of bytes, convert into char (ascii only)
 		print("Data: " + asString)
+		
+		if(asString == "unlock"):
+			unlockDoor()
+		elif (asString == "lock"):
+			lockDoor()
+			
 	except Exception as e:
 		print ("Error printing data: %s" % str(e))
 
@@ -141,11 +149,13 @@ def unlockDoor():#these are there own functions rather than direct setservo call
 	setDoorServo(0)#this is better than search and replacing the 0/100 values and sleep times every time we want to fiddle with them
 	time.sleep(5)
 	stopDoorServo()
+	print("Unlocking door")
 
 def lockDoor():
-	setDoorServo(100)
-	time.sleep(5)
-	stopDoorServo()
+	#setDoorServo(100)
+	#time.sleep(5)
+	#stopDoorServo()
+	print("Locking door")
 	
 def run():
 	try:

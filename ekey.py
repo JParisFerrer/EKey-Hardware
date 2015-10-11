@@ -23,9 +23,6 @@ uuid = "dad8bf14-b6c3-45fa-b9a7-94c1fde2e7c6"
 
 doorServo = GPIO.PWM(1, 50)    # create an object p for PWM on port 25 at 50 Hertz
 #We will need to fiddle wtih the frequency most likely. 
-#It's global because I don't want to constantly construct/cleanup an object every time we want to refer to out one servo
-#I don't like having one global object with global functions written just to interface with it, but 
-#since we only have one servo I don't think it's worth the time to extantiate an lock/unlock sub in class
 
 
 def startBLEBeacon():
@@ -83,6 +80,8 @@ def listenForData():
 					
 					# add the received data to out variable of all dat
 					allData.extend(data)
+					
+					break		# break every time for testing, so read data then process
 				
 			except IOError:
 				print("disconnected")
@@ -95,7 +94,17 @@ def listenForData():
 		raise	# throw it back up to terminate (can be changed later)
 	
 def processData(bytes):
-	pass
+	try:
+		asString = ''.join(chr(v) for v in bytes)	# take our list of bytes, convert into char (ascii only)
+		print("Data: " + asString)
+		
+		if(asString == "unlock"):
+			unlockDoor()
+		elif (asString == "lock"):
+			lockDoor()
+			
+	except Exception as e:
+		print ("Error printing data: %s" % str(e))
 
 def initDatabase():
 	global sqlCon
@@ -106,7 +115,27 @@ def initDatabase():
 		
 	sqlCon = lite.connect("./ekey.db")
 	
-def setDoorServo(int pin, int position):
+	# returs our data by column name, so data["UUID"], instead of data[2] (or whatever column number it is)
+	sqlCon.row_Factory = lite.Row
+	
+def getKeyByUUID(uuid):
+	try:
+		cur = sqlCon.cursor()
+		
+		# use the parameterized query
+		cur.execute("SELECT * FROM Keys WHERE UUID=?", (uuid))
+	
+		key = cur.fetchone()
+		
+		# key is a dictionary indexed by column names 
+		return key;
+	
+	except lite.Error as e:
+		#cur.rollback()	# nothing to rollback, its a SELECT nothing else
+		print("Error getting Key by UUID: %s" % e.args[0])
+		
+
+def setDoorServo(pin, position):
 	position = max(min(postion,100),0)#cap position between 0-100
 
 	global doorServo
@@ -120,11 +149,13 @@ def unlockDoor():#these are there own functions rather than direct setservo call
 	setDoorServo(0)#this is better than search and replacing the 0/100 values and sleep times every time we want to fiddle with them
 	time.sleep(5)
 	stopDoorServo()
+	print("Unlocking door")
 
 def lockDoor():
-	setDoorServo(100)
-	time.sleep(5)
-	stopDoorServo()
+	#setDoorServo(100)
+	#time.sleep(5)
+	#stopDoorServo()
+	print("Locking door")
 	
 def run():
 	try:
@@ -150,5 +181,7 @@ def run():
 			stopBLEBeacon()
 		server_sock.close()	
 		
+		if(sqlCon):
+			sqlCon.close()
 		
 run()

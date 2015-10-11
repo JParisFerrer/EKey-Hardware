@@ -93,7 +93,7 @@ def listenForData():
 	
 def processData(bytes):
 	try:
-		asString = ''.join(bytes).decode("utf-8")	# take our list of bytes, concat into a byte string, then decode it
+		asString = ''.join(chr(v) for v in bytes)	# take our list of bytes, convert into char (ascii only)
 		print("Data: " + asString)
 	except Exception as e:
 		print ("Error printing data: %s" % str(e))

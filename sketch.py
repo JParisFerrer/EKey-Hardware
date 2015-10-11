@@ -1,7 +1,7 @@
 from bluetooth import *
 
 def run():
-    uuid = "94f39d29-7d6d-437d-973b-fba39e49d4ee"
+    uuid = "dad8bf14-b6c3-45fa-b9a7-94c1fde2e7c6"
     addr = "acfdce5ae1b8"
     service_matches = find_service( uuid = uuid, address = addr )
     

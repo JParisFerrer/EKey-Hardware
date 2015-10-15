@@ -7,7 +7,7 @@ import os;
 import os.path;
 
 # Whether to use BLE beacon or normal bluetooth advertisement
-BLE = True
+BLE = False
 
 # make sure we have this global variable set up
 service = None

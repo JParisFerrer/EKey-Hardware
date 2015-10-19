@@ -1,9 +1,13 @@
 from bluetooth import *
 from bluetooth.ble import BeaconService
+import RPi.GPIO as GPIO
 import time
+import sqlite3 as lite;
+import os;
+import os.path;
 
 # Whether to use BLE beacon or normal bluetooth advertisement
-BLE = True
+BLE = False
 
 # make sure we have this global variable set up
 service = None
@@ -11,8 +15,15 @@ service = None
 # our normal bluetooth socket
 server_sock = None
 
+# the connection to our SQL server
+sqlCon = None
+
 # just a random uuid I generated
 uuid = "dad8bf14-b6c3-45fa-b9a7-94c1fde2e7c6"
+
+doorServo = GPIO.PWM(1, 50)    # create an object p for PWM on port 25 at 50 Hertz
+#We will need to fiddle wtih the frequency most likely. 
+
 
 def startBLEBeacon():
 	print("Starting BLE Beacon")
@@ -69,22 +80,87 @@ def listenForData():
 					
 					# add the received data to out variable of all dat
 					allData.extend(data)
+					
+					processData(data)	# process data everyime for testing
 				
 			except IOError:
 				print("disconnected")
 				
 			# at this point all of our data should be read
-			processData(allData)
+			#processData(allData)
 			
 	except Exception as e:
 		print ("Error listening for data: %s" % str(e))
 		raise	# throw it back up to terminate (can be changed later)
 	
 def processData(bytes):
-	pass
+	try:
+		asString = ''.join(chr(v) for v in bytes)	# take our list of bytes, convert into char (ascii only)
+		print("Data: " + asString)
+		
+		if(asString == "unlock"):
+			unlockDoor()
+		elif (asString == "lock"):
+			lockDoor()
+			
+	except Exception as e:
+		print ("Error printing data: %s" % str(e))
 
+def initDatabase():
+	global sqlCon
+	
+	# if database doesn't exist, create it using external shell script
+	if (not os.path.isfile("ekey.db")):
+		os.system("./db.sh")
+		
+	sqlCon = lite.connect("./ekey.db")
+	
+	# returs our data by column name, so data["UUID"], instead of data[2] (or whatever column number it is)
+	sqlCon.row_factory = lite.Row
+	
+def getKeyByUUID(uuid):
+	try:
+		cur = sqlCon.cursor()
+		
+		# use the parameterized query
+		cur.execute("SELECT * FROM Keys WHERE UUID=?", (uuid))
+	
+		key = cur.fetchone()
+		
+		# key is a dictionary indexed by column names 
+		return key;
+	
+	except lite.Error as e:
+		#cur.rollback()	# nothing to rollback, its a SELECT nothing else
+		print("Error getting Key by UUID: %s" % e.args[0])
+		
+
+def setDoorServo(pin, position):
+	position = max(min(postion,100),0)#cap position between 0-100
+
+	global doorServo
+	doorServo.start(position) #between 0-100 % duty cycle, this will need adjustment in the lock/unlock functions
+	
+def stopDoorServo():
+	global doorServo
+	doorServo.stop()
+	
+def unlockDoor():#these are there own functions rather than direct setservo calls because we will be fiddling with the 0/100 and 
+	setDoorServo(0)#this is better than search and replacing the 0/100 values and sleep times every time we want to fiddle with them
+	time.sleep(5)
+	stopDoorServo()
+	print("Unlocking door")
+
+def lockDoor():
+	#setDoorServo(100)
+	#time.sleep(5)
+	#stopDoorServo()
+	print("Locking door")
+	
 def run():
 	try:
+		initDatabase()
+		
 		if (BLE):
 			startBLEBeacon()
 		
@@ -105,5 +181,7 @@ def run():
 			stopBLEBeacon()
 		server_sock.close()	
 		
+		if(sqlCon):
+			sqlCon.close()
 		
 run()

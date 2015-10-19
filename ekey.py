@@ -20,14 +20,13 @@ sqlCon = None
 
 # just a random uuid I generated
 uuid = "dad8bf14-b6c3-45fa-b9a7-94c1fde2e7c6"
-GPIO.setmode(GPIO.BCM)
-GPIO.setup(23,GPIO.OUT) #phsyical pin 16
-doorServo = GPIO.PWM(23, 50)
+
+doorServo = None
 
 # create an object p for PWM on port 25 at 50 Hertz
 #We will need to fiddle wtih the frequency most likely. 
 
-
+#-------BLUETOOTH SHENANIGANS START HERE-----------------------------------
 def startBLEBeacon():
 	print("Starting BLE Beacon")
 	global service
@@ -164,7 +163,12 @@ def lockDoor():
 	stopDoorServo()
 	print("Locking door")
 	
+#--------MAIN EQUIVALENT --------------------------------------
+	
 def run():
+	GPIO.setmode(GPIO.BCM)
+	GPIO.setup(23,GPIO.OUT) #phsyical pin 16
+	doorServo = GPIO.PWM(23, 50)
 	try:
 		initDatabase()
 		

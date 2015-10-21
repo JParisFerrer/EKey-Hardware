@@ -21,10 +21,10 @@ sqlCon = None
 # just a random uuid I generated
 uuid = "dad8bf14-b6c3-45fa-b9a7-94c1fde2e7c6"
 
-doorServo = GPIO.PWM(1, 50)    # create an object p for PWM on port 25 at 50 Hertz
-#We will need to fiddle wtih the frequency most likely. 
+doorServo = None
 
 
+#-------BLUETOOTH SHENANIGANS START HERE-----------------------------------
 def startBLEBeacon():
 	print("Starting BLE Beacon")
 	global service
@@ -134,30 +134,40 @@ def getKeyByUUID(uuid):
 		#cur.rollback()	# nothing to rollback, its a SELECT nothing else
 		print("Error getting Key by UUID: %s" % e.args[0])
 		
+#-----------------------SERVO FUNCTIONS START HERE -------------------------------------
 
-def setDoorServo(pin, position):
-	position = max(min(postion,100),0)#cap position between 0-100
+def degreeToDuty (angle):
+        return angle/10 +2.5
+
+def setDoorServo(pin, angle):#angle is now in DEGREES
+	angle = max(min(angle,175),5)#cap position between 0-100
 
 	global doorServo
-	doorServo.start(position) #between 0-100 % duty cycle, this will need adjustment in the lock/unlock functions
+	doorServo.start(degreeToDuty(angle)) #between 0-100 % duty cycle, this will need adjustment in the lock/unlock functions
 	
 def stopDoorServo():
 	global doorServo
 	doorServo.stop()
 	
 def unlockDoor():#these are there own functions rather than direct setservo calls because we will be fiddling with the 0/100 and 
-	setDoorServo(0)#this is better than search and replacing the 0/100 values and sleep times every time we want to fiddle with them
+	setDoorServo(40)#this is better than search and replacing the 0/100 values and sleep times every time we want to fiddle with them
 	time.sleep(5)
 	stopDoorServo()
 	print("Unlocking door")
 
 def lockDoor():
-	#setDoorServo(100)
-	#time.sleep(5)
-	#stopDoorServo()
+	setDoorServo(140)
+	time.sleep(5)
+	stopDoorServo()
 	print("Locking door")
 	
+#--------MAIN EQUIVALENT --------------------------------------
+	
 def run():
+	GPIO.setmode(GPIO.BCM)
+	GPIO.setup(23,GPIO.OUT) #phsyical pin 16
+	doorServo = GPIO.PWM(23, 50)
+	
 	try:
 		initDatabase()
 		

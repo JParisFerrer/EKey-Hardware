@@ -112,9 +112,11 @@ def initDatabase():
 	
 	# if database doesn't exist, create it using external shell script
 	if (not os.path.isfile("ekey.db")):
+		print("Creating database file...")
 		os.system("./db.sh")
 		
 	sqlCon = lite.connect("./ekey.db")
+	print("Connected to database file")
 	
 	# returs our data by column name, so data["UUID"], instead of data[2] (or whatever column number it is)
 	sqlCon.row_factory = lite.Row
@@ -140,14 +142,12 @@ def getKeyByUUID(uuid):
 def degreeToDuty (angle):
         return angle/10 +2.5
 
-def setDoorServo(pin, angle):#angle is now in DEGREES
+def setDoorServo(angle):#angle is now in DEGREES
 	angle = max(min(angle,175),5)#cap position between 0-100
 
-	global doorServo
 	doorServo.start(degreeToDuty(angle)) #between 0-100 % duty cycle, this will need adjustment in the lock/unlock functions
 	
 def stopDoorServo():
-	global doorServo
 	doorServo.stop()
 	
 def unlockDoor():#these are there own functions rather than direct setservo calls because we will be fiddling with the 0/100 and 
@@ -162,15 +162,22 @@ def lockDoor():
 	stopDoorServo()
 	print("Locking door")
 	
-#--------MAIN EQUIVALENT --------------------------------------
+def initServo():
+	global doorServo
 	
-def run():
 	GPIO.setmode(GPIO.BCM)
 	GPIO.setup(23,GPIO.OUT) #phsyical pin 16
 	doorServo = GPIO.PWM(23, 50)
 	
+	
+#--------MAIN EQUIVALENT --------------------------------------
+	
+def run():
+	
 	try:
 		initDatabase()
+		
+		initServo()
 		
 		if (BLE):
 			startBLEBeacon()

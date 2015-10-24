@@ -6,10 +6,21 @@ import sqlite3 as lite;
 import os;
 import os.path;
 
+# --------- CONSTANTS -----------------------------------------------------
+
 # Whether to use BLE beacon or normal bluetooth advertisement
 BLE = False
 
-# make sure we have this global variable set up
+# just a random uuid I generated
+UUID = "dad8bf14-b6c3-45fa-b9a7-94c1fde2e7c6"
+
+# what pin our servo is connected to
+SERVO_PIN = 18
+
+
+# --------- GLOBAL VARIABLES ----------------------------------------------
+
+# BLE beacon
 service = None
 
 # our normal bluetooth socket
@@ -17,9 +28,6 @@ server_sock = None
 
 # the connection to our SQL server
 sqlCon = None
-
-# just a random uuid I generated
-UUID = "dad8bf14-b6c3-45fa-b9a7-94c1fde2e7c6"
 
 doorServo = None
 
@@ -166,8 +174,8 @@ def initServo():
 	global doorServo
 	
 	GPIO.setmode(GPIO.BCM)
-	GPIO.setup(23,GPIO.OUT) #phsyical pin 16
-	doorServo = GPIO.PWM(23, 50)
+	GPIO.setup(SERVO_PIN,GPIO.OUT) #phsyical pin 16
+	doorServo = GPIO.PWM(SERVO_PIN, 50)
 	
 	
 #--------MAIN EQUIVALENT --------------------------------------

@@ -1,5 +1,5 @@
 from bluetooth import *
-from bluetooth.ble import BeaconService
+#from bluetooth.ble import BeaconService
 import RPi.GPIO as GPIO
 import time
 import sqlite3 as lite;

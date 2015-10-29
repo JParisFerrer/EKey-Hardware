@@ -17,10 +17,10 @@ doorServo = None
 	# not sure how python like overloaded functions, inactive for now
 	# if string decrypts properly, timestamp is valid etc then open
 	# for now just bounce the string back
-	# return 'you sent %s!' encryptedstring #these returns might be for html pages, so it's possible that none of these work
+	# return 'you sent %s!' %encryptedstring #these returns might be for html pages, so it's possible that none of these work
 # @ekeyflask.route('/cmd/unlock/<encrypted_string>')
 	# same deal
-	# return 'you sent %s!' encryptedstring
+	# return 'you sent %s!' %encryptedstring
 
 @ekeyflask.route('/cmd/unlock')
 def unlock():
@@ -34,7 +34,7 @@ def lock():
 	
 @ekeyflask.route(/cmd/checkstring/<encryptedstring>)
 def checkstring():
-	return 'you sent %s!' encryptedstring #should just bounce string back
+	return 'you sent %s!' %encryptedstring #should just bounce string back
 
 	
 @ekeyflask.route(/hello)

@@ -23,20 +23,22 @@ doorServo = None
 	# return 'you sent %s!' encryptedstring
 
 @ekeyflask.route('/cmd/unlock')
-def unlock
+def unlock:
 	unlockDoor()
 	return 'Door unlocked! please disable me in prod'
 
 @ekeyflask.route('/cmd/lock')
-def lock
+def lock:
 	lockDoor()
 	return 'Door locked! please diable me in prod'
 	
 @ekeyflask.route(/cmd/checkstring/<encryptedstring>)
+def checkstring:
 	return 'you sent %s!' encryptedstring #should just bounce string back
 
 	
 @ekeyflask.route(/hello)
+def hello:
 	return 'hello!'
 	
 #-----------------------SERVO FUNCTIONS START HERE -------------------------------------

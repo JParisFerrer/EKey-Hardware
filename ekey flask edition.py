@@ -12,15 +12,15 @@ doorServo = None
 
 #-------FLASK SHENANIGANS START HERE-----------------------------------
 
-@ekeyflask.route('/cmd/unlock/<encrypted_string>')
-#def unlock(encryptedstring): 
-	#not sure how python like overloaded functions, inactive for now
+# @ekeyflask.route('/cmd/unlock/<encrypted_string>')
+# def unlock(encryptedstring): 
+	# not sure how python like overloaded functions, inactive for now
 	# if string decrypts properly, timestamp is valid etc then open
-	#for now just bounce the string back
-	return 'you sent %s!' encryptedstring #these returns might be for html pages, so it's possible that none of these work
-#@ekeyflask.route('/cmd/unlock/<encrypted_string>')
-	#same deal
-	#return 'you sent %s!' encryptedstring
+	# for now just bounce the string back
+	# return 'you sent %s!' encryptedstring #these returns might be for html pages, so it's possible that none of these work
+# @ekeyflask.route('/cmd/unlock/<encrypted_string>')
+	# same deal
+	# return 'you sent %s!' encryptedstring
 
 @ekeyflask.route('/cmd/unlock')
 def unlock

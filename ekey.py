@@ -2,6 +2,7 @@ from bluetooth import *
 #from bluetooth.ble import BeaconService
 import RPi.GPIO as GPIO
 import time
+from datetime import datetime
 import sqlite3 as lite;
 import os;
 import os.path;
@@ -31,10 +32,14 @@ sqlCon = None
 
 doorServo = None
 
+#-------HELPER FUCNTIONS--------------------------------------------------
+def printFF(s):
+	print("[" + str(datetime.now().time().hour) + ":" + str(datetime.now().time().minute) + ":" + str(datetime.now().time().second) + "] " + s)
+
 
 #-------BLUETOOTH SHENANIGANS START HERE-----------------------------------
 def startBLEBeacon():
-	print("Starting BLE Beacon")
+	printF("Starting BLE Beacon")
 	global service
 	service = BeaconService()
 	
@@ -45,7 +50,7 @@ def startBLEBeacon():
 		200)								# interval - not exactly sure what this does either, but this is the default
 	
 def stopBLEBeacon():
-	print("Stopping BLE Beacon")
+	printF("Stopping BLE Beacon")
 	service.stop_advertising()
 	
 def setupDataListener():
@@ -58,7 +63,7 @@ def setupDataListener():
 	
 	# advertise normally if no BLE
 	if(not BLE):
-		print ("Starting non-BLE beacon")
+		printF ("Starting non-BLE beacon")
 		advertise_service( server_sock, "EKey Lock",
                    service_id = UUID,
                    service_classes = [ UUID, SERIAL_PORT_CLASS ],
@@ -66,7 +71,7 @@ def setupDataListener():
 #                   protocols = [ OBEX_UUID ] 
                     )
 	
-	print("Waiting for connection on RFCOMM channel %d" % port)
+	printF("Waiting for connection on RFCOMM channel %d" % port)
 
 	
 def listenForData():
@@ -74,7 +79,7 @@ def listenForData():
 		# keep accepting connections
 		while True:
 			client_sock, client_info = server_sock.accept()
-			print("Accepted connection from: ", client_info)
+			printF("Accepted connection from: ", client_info)
 			
 			allData = []
 		
@@ -84,7 +89,7 @@ def listenForData():
 				
 					if len(data) == 0: break
 				
-					print("received [%d] bytes" % len(data))
+					printF("received [%d] bytes" % len(data))
 					
 					# add the received data to out variable of all dat
 					allData.extend(data)
@@ -92,19 +97,19 @@ def listenForData():
 					processData(data)	# process data everyime for testing
 				
 			except IOError:
-				print("disconnected")
+				printF("disconnected")
 				
 			# at this point all of our data should be read
 			#processData(allData)
 			
 	except Exception as e:
-		print ("Error listening for data: %s" % str(e))
+		printF ("Error listening for data: %s" % str(e))
 		raise	# throw it back up to terminate (can be changed later)
 	
 def processData(bytes):
 	try:
 		asString = ''.join(chr(v) for v in bytes)	# take our list of bytes, convert into char (ascii only)
-		print("Data: " + asString)
+		printF("Data: " + asString)
 		
 		if(asString == "unlock"):
 			unlockDoor()
@@ -112,7 +117,7 @@ def processData(bytes):
 			lockDoor()
 			
 	except Exception as e:
-		print ("Error printing data: %s" % str(e))
+		printF ("Error printFing data: %s" % str(e))
 
 # ---- DATABASE FUCNTIONS ----------------------------------------------------------------------------------------
 def initDatabase():
@@ -120,11 +125,11 @@ def initDatabase():
 	
 	# if database doesn't exist, create it using external shell script
 	if (not os.path.isfile("ekey.db")):
-		print("Creating database file...")
+		printF("Creating database file...")
 		os.system("./db.sh")
 		
 	sqlCon = lite.connect("./ekey.db")
-	print("Connected to database file")
+	printF("Connected to database file")
 	
 	# returs our data by column name, so data["UUID"], instead of data[2] (or whatever column number it is)
 	sqlCon.row_factory = lite.Row
@@ -143,7 +148,7 @@ def getKeyByUUID(uuid):
 	
 	except lite.Error as e:
 		#cur.rollback()	# nothing to rollback, its a SELECT nothing else
-		print("Error getting Key by UUID: %s" % e.args[0])
+		printF("Error getting Key by UUID: %s" % e.args[0])
 		
 #-----------------------SERVO FUNCTIONS START HERE -------------------------------------
 
@@ -153,22 +158,23 @@ def degreeToDuty (angle):
 def setDoorServo(angle):#angle is now in DEGREES
 	angle = max(min(angle,175),5)#cap position between 0-100
 
-	doorServo.start(degreeToDuty(angle)) #between 0-100 % duty cycle, this will need adjustment in the lock/unlock functions
+	#doorServo.start(degreeToDuty(angle)) #between 0-100 % duty cycle, this will need adjustment in the lock/unlock functions
+	doorServo.ChangeDutyCycle(angle)	# turns out that 5 - 11 (% apparently) is around 90 degrees for some reason
 	
 def stopDoorServo():
 	doorServo.stop()
 	
 def unlockDoor():#these are there own functions rather than direct setservo calls because we will be fiddling with the 0/100 and 
-	setDoorServo(40)#this is better than search and replacing the 0/100 values and sleep times every time we want to fiddle with them
-	time.sleep(5)
-	stopDoorServo()
-	print("Unlocking door")
+	printF("Unlocking door")
+	setDoorServo(11)	#Don't question it
+	time.sleep(2)
+	#stopDoorServo()	#once the servo stops it never comes back	
 
 def lockDoor():
-	setDoorServo(140)
-	time.sleep(5)
-	stopDoorServo()
-	print("Locking door")
+	printF("Locking door")
+	setDoorServo(5)	#Don't question it
+	time.sleep(2)
+	#stopDoorServo()	#once the servo stops it doesn't come back
 	
 def initServo():
 	global doorServo
@@ -176,6 +182,8 @@ def initServo():
 	GPIO.setmode(GPIO.BCM)
 	GPIO.setup(SERVO_PIN,GPIO.OUT) #phsyical pin 16
 	doorServo = GPIO.PWM(SERVO_PIN, 50)
+	
+	doorServo.start(5);
 	
 	
 #--------MAIN EQUIVALENT --------------------------------------
@@ -196,10 +204,10 @@ def run():
 		
 		
 	except Exception as e:
-		print("Exception " + str(e))
+		printF("Exception " + str(e))
 		
 	finally:
-		print("Exiting...")
+		printF("Exiting...")
 		
 		if (BLE):
 			stopBLEBeacon()

@@ -33,7 +33,7 @@ sqlCon = None
 doorServo = None
 
 #-------HELPER FUCNTIONS--------------------------------------------------
-def printFF(s):
+def printF(s):
 	print("[" + str(datetime.now().time().hour) + ":" + str(datetime.now().time().minute) + ":" + str(datetime.now().time().second) + "] " + s)
 
 

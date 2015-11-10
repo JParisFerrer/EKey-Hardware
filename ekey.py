@@ -116,7 +116,7 @@ def processData(bytes):
 		printF("Data: " + asString)
 		
 		# if input starts with rsa treat rest as encrypted data
-		if(asString[0:2] == "rsa"):
+		if(asString[0:3] == "rsa"):
 			asString = decrypt(asString[3:].encode("utf-8"))
 		
 		if(asString == "unlock"):
@@ -204,7 +204,10 @@ def initRSA():
 	pKey = rsa.PrivateKey.load_pkcs1(keyData)
 
 def decrypt(bytes):
-	plain = rsa.decrypt(bytes, pKey)
+	try:
+		plain = rsa.decrypt(bytes, pKey)
+	except Exception as e:
+		printF("Error decrypting bytes: %s; %s" % (str(bytes), str(e)))
 	
 	return plain
 

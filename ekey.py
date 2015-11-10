@@ -83,7 +83,7 @@ def listenForData():
 		# keep accepting connections
 		while True:
 			client_sock, client_info = server_sock.accept()
-			printF("Accepted connection from: ", client_info)
+			printF("Accepted connection from: %s" % client_info)
 			
 			allData = []
 		
@@ -214,6 +214,8 @@ def run():
 	
 	try:
 		initDatabase()
+		
+		initRSA()
 		
 		initServo()
 		

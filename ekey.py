@@ -6,6 +6,7 @@ from datetime import datetime
 import sqlite3 as lite;
 import os;
 import os.path;
+import rsa;
 
 # --------- CONSTANTS -----------------------------------------------------
 
@@ -31,6 +32,9 @@ server_sock = None
 sqlCon = None
 
 doorServo = None
+
+# private key
+pKey = None
 
 #-------HELPER FUCNTIONS--------------------------------------------------
 def printF(s):
@@ -79,7 +83,7 @@ def listenForData():
 		# keep accepting connections
 		while True:
 			client_sock, client_info = server_sock.accept()
-			printF("Accepted connection from: ", client_info)
+			printF("Accepted connection from: %s" % client_info)
 			
 			allData = []
 		
@@ -110,6 +114,10 @@ def processData(bytes):
 	try:
 		asString = ''.join(chr(v) for v in bytes)	# take our list of bytes, convert into char (ascii only)
 		printF("Data: " + asString)
+		
+		# if input starts with rsa treat rest as encrypted data
+		if(asString[0:3] == "rsa"):
+			asString = decrypt(asString[3:].encode("utf-8"))
 		
 		if(asString == "unlock"):
 			unlockDoor()
@@ -186,12 +194,31 @@ def initServo():
 	doorServo.start(5);
 	
 	
+#--------ENCRYPTION STUFF--------------------------------------
+def initRSA():
+	global pKey
+	
+	with open("ekey.pem") as pFile:
+		keyData = pFile.read()
+		
+	pKey = rsa.PrivateKey.load_pkcs1(keyData)
+
+def decrypt(bytes):
+	try:
+		plain = rsa.decrypt(bytes, pKey)
+	except Exception as e:
+		printF("Error decrypting bytes: %s; %s" % (str(bytes), str(e)))
+	
+	return plain
+
 #--------MAIN EQUIVALENT --------------------------------------
 	
 def run():
 	
 	try:
 		initDatabase()
+		
+		initRSA()
 		
 		initServo()
 		

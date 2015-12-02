@@ -133,7 +133,7 @@ def processData(bytes):
 		
 			if(abs(timestamp, time.time()) > 60):
 				printF("Open request denied at %d (delta: %d)" % (timestamp, timestamp-time.time()))
-				break
+				return
 		
 		
 		if (isRSA):

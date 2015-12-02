@@ -4,11 +4,14 @@ import time
 import sqlite3 as lite;
 import os;
 import os.path;
+import rsa;
+from datetime import datetime;
 
 #this sets up a flask server referred to in code as ekeyflask
 ekeyflask = Flask(__name__)
 doorServo = None
 
+SERVO_PIN = 18 #servo constant
 
 #-------FLASK SHENANIGANS START HERE-----------------------------------
 
@@ -34,6 +37,19 @@ def lock():
 	
 @ekeyflask.route(/cmd/checkstring/<encryptedstring>)
 def checkstring():
+        try:
+		
+		# if input starts with rsa treat rest as encrypted data
+		if(encryptedstring[0:3] == "rsa"):
+			asString = decrypt(asString[3:].encode("utf-8"))
+		
+		if(encryptedstring == "unlock"):
+			unlockDoor()
+		elif (encryptedstring == "lock"):
+			lockDoor()
+			
+	except Exception as e:
+		printF ("Error printFing data: %s" % str(e))
 	return 'you sent %s!' %encryptedstring #should just bounce string back
 
 	
@@ -47,35 +63,64 @@ def degreeToDuty (angle):
         return angle/10 +2.5
 
 def setDoorServo(pin, angle):#angle is now in DEGREES
-	angle = max(min(angle,175),5)#cap position between 0-100
-
-	global doorServo
-	doorServo.start(degreeToDuty(angle)) #between 0-100 % duty cycle, this will need adjustment in the lock/unlock functions
+        angle = max(min(angle,175),5)#cap position between 0-100
+        
+	#doorServo.start(degreeToDuty(angle)) #between 0-100 % duty cycle, this will need adjustment in the lock/unlock functions
+	doorServo.ChangeDutyCycle(angle)	# turns out that 5 - 11 (% apparently) is around 90 degrees for some reason
 	
 def stopDoorServo():
-	global doorServo
 	doorServo.stop()
 	
 def unlockDoor():#these are there own functions rather than direct setservo calls because we will be fiddling with the 0/100 and 
-	setDoorServo(40)#this is better than search and replacing the 0/100 values and sleep times every time we want to fiddle with them
-	time.sleep(5)
-	stopDoorServo()
-	print("Unlocking door")
+	printF("Unlocking door")
+	setDoorServo(11)	#Voodoo motor crap. Don't question it
+	time.sleep(2)
 
 def lockDoor():
-	setDoorServo(140)
-	time.sleep(5)
-	stopDoorServo()
-	print("Locking door")
+printF("Locking door")
+	setDoorServo(5)	#Again, don't question it
+	time.sleep(2)
+
+def initServo():
+	global doorServo
+	
+	GPIO.setmode(GPIO.BCM)
+	GPIO.setup(SERVO_PIN,GPIO.OUT) #phsyical pin 16
+	doorServo = GPIO.PWM(SERVO_PIN, 50)
+	
+	doorServo.start(5);
+	
+#-------HELPER FUCNTIONS--------------------------------------------------
+def printF(s):
+	print("[" + str(datetime.now().time().hour) + ":" + str(datetime.now().time().minute) + ":" + str(datetime.now().time().second) + "] " + s)
+	
+#--------ENCRYPTION STUFF--------------------------------------
+def initRSA():
+	global pKey
+	
+	with open("ekey.pem") as pFile:
+		keyData = pFile.read()
+		
+	pKey = rsa.PrivateKey.load_pkcs1(keyData)
+
+def decrypt(bytes):
+	try:
+		plain = rsa.decrypt(bytes, pKey)
+	except Exception as e:
+		printF("Error decrypting bytes: %s; %s" % (str(bytes), str(e)))
+	
+	return plain	
 	
 #--------MAIN EQUIVALENT --------------------------------------
 	
 def run():
-	GPIO.setmode(GPIO.BCM)
-	GPIO.setup(23,GPIO.OUT) #phsyical pin 16
-	doorServo = GPIO.PWM(23, 50)
+	try:
+                initServo()
+                initRSA()
+                ekeyflask.run(host ='0.0.0.0) #makes the script/server/thing listen on all IPs
+                              
+        except Exception as e:
+                printF("Exception " + str(e))
 	
-	
-	ekeyflask.run(host ='0.0.0.0) #makes the script/server/thing listen on all IPs
 		
 run()

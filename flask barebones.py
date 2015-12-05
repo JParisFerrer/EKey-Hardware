@@ -45,10 +45,10 @@ def startServer():
     socketio.run(ekeyflask, host = '0.0.0.0')
 #--------BROADCAST STUFFS -------------------------------------
 
-def startBroadcast():
-    threading.Timer(1,broadcast).start()
-    broadcast('test data')
-    print('startBroadcast call')
+##def startBroadcast():
+##    threading.Timer(1,broadcast).start()
+##    broadcast('test data')
+##    print('startBroadcast call')
 def broadcast(data):
     socketio.emit('ekey-broadcast-event', data)
     print('broadcasting')
@@ -62,10 +62,11 @@ def run():
     ekeyflask.debug = False
     ekeyflask.use_reloader = False
     print('starting server...')
-    t = threading.Thread(target = startServer())
-    t.start()
+    serverThread = threading.Thread(target = startServer())
+    serverThread.start()
     print('starting broadcast...')
-    startBroadcast()
+    broadcastThread = threading.Timer(1,broadcast).start()
+    broadcastThread.start()
 
-    
+
 run()

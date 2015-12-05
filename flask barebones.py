@@ -49,9 +49,10 @@ def startServer():
 ##    threading.Timer(1,broadcast).start()
 ##    broadcast('test data')
 ##    print('startBroadcast call')
-def broadcast(data):
-    socketio.emit('ekey-broadcast-event', data)
+def broadcast():
+    socketio.emit('ekey-broadcast-event', 'data')
     print('broadcasting')
+    threading.Timer(2,broadcast).start()
     
 #--------MAIN EQUIVALENT --------------------------------------
     
@@ -65,7 +66,7 @@ def run():
     serverThread = threading.Thread(target = startServer)
     serverThread.start()
     print('starting broadcast...')
-    broadcastThread = threading.Timer(1,broadcast, ['test data'])
+    broadcastThread = threading.Timer(2,broadcast)
     broadcastThread.start()
 
 

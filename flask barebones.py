@@ -62,10 +62,10 @@ def run():
     ekeyflask.debug = False
     ekeyflask.use_reloader = False
     print('starting server...')
-    serverThread = threading.Thread(target = startServer())
+    serverThread = threading.Thread(target = startServer)
     serverThread.start()
     print('starting broadcast...')
-    broadcastThread = threading.Timer(1,broadcast).start()
+    broadcastThread = threading.Timer(1,broadcast, ['test data'])
     broadcastThread.start()
 
 

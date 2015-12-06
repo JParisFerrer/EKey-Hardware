@@ -29,7 +29,7 @@ def unlock():
 def lock():
     return 'Door locked! please disable me in prod'
     
-@ekeyflask.route('/cmd/checkstring/<encryptedstring>')
+@ekeyflask.route('/checkstring/<encryptedstring>')
 def checkstring(encryptedstring):
     print(encryptedstring + "was received!")
     return 'you sent %s!' %encryptedstring
@@ -38,8 +38,8 @@ def checkstring(encryptedstring):
     
 @ekeyflask.route('/hello')
 def hello():
-    return 'hello!'
     print('hello!')
+    return 'hello!'
 
 def startServer():
     socketio.run(ekeyflask, host = '0.0.0.0')
@@ -50,9 +50,9 @@ def startServer():
 ##    broadcast('test data')
 ##    print('startBroadcast call')
 def broadcast():
-    socketio.emit('ekey-broadcast-event', 'data')
-    print('broadcasting')
-    threading.Timer(2,broadcast).start()
+    socketio.emit('ekey-broadcast-event', {'data':123})#, namespace = '/global')
+    print('broadcast sent')
+    threading.Timer(.1,broadcast).start()
     
 #--------MAIN EQUIVALENT --------------------------------------
     
@@ -65,9 +65,10 @@ def run():
     print('starting server...')
     serverThread = threading.Thread(target = startServer)
     serverThread.start()
+    
     print('starting broadcast...')
-    broadcastThread = threading.Timer(2,broadcast)
-    broadcastThread.start()
+    broadcastThread = threading.Timer(1,broadcast)
+    #broadcastThread.start()
 
 
 run()

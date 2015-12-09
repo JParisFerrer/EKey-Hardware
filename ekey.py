@@ -114,14 +114,36 @@ def processData(bytes):
 	try:
 		asString = ''.join(chr(v) for v in bytes)	# take our list of bytes, convert into char (ascii only)
 		printF("Data: " + asString)
+		isRSA = False
 		
 		# if input starts with rsa treat rest as encrypted data
 		if(asString[0:3] == "rsa"):
 			asString = decrypt(asString[3:].encode("utf-8"))
+			isRSA = True
 		
-		if(asString == "unlock"):
+		if(isRSA):
+			# 10 char timestamp
+			try:
+				timestamp = int(asString[0:9])
+		
+				dt = datetime.utcfromtimestamp(timestamp)
+			
+			except Exception as e:
+				printF("Exception parsing timestamp '%s': %s" % (str(timestamp), str(e)))
+		
+			if(abs(timestamp, time.time()) > 60):
+				printF("Open request denied at %d (delta: %d)" % (timestamp, timestamp-time.time()))
+				return
+		
+		
+		if (isRSA):
+			cmd = asString[10:]
+		else:
+			cmd = asString
+		
+		if(cmd == "unlock"):
 			unlockDoor()
-		elif (asString == "lock"):
+		elif (cmd == "lock"):
 			lockDoor()
 			
 	except Exception as e:
